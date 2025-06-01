@@ -7,7 +7,6 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <style>
     body {
@@ -15,7 +14,7 @@
       font-family: 'Courier New', monospace;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
+      min-height: 100dvh;
     }
     select {
       background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%231a3e1a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
@@ -42,9 +41,6 @@
     }
     footer {
       background-color: #1a3e1a;
-    }
-    html, body {
-      overflow-x: hidden;
     }
   </style>
 </head>
@@ -143,7 +139,7 @@
             this.filterProducts();
           } catch (error) {
             console.error('Error loading products:', error);
-            this.showErrorAlert();
+            alert('Error: Gagal memuat daftar produk');
           }
         },
         
@@ -170,45 +166,17 @@
         },
         
         buyProduct(product) {
-          Swal.fire({
-            title: `Beli ${product.name}?`,
-            html: `
-              <div class="text-left">
-                <p>Anda akan membeli:</p>
-                <div class="flex items-center mt-2 mb-4">
-                  <img src="${product.image}" alt="${product.name}" class="w-16 h-16 object-cover rounded-lg mr-3">
-                  <div>
-                    <p class="font-semibold">${product.name}</p>
-                    <p class="text-green-800 font-bold">Rp ${product.price.toLocaleString('id-ID')}</p>
-                  </div>
-                </div>
-                <p>Pesanan akan dilanjutkan ke WhatsApp.</p>
-              </div>
-            `,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Lanjutkan ke WhatsApp',
-            cancelButtonText: 'Batal'
-          }).then((result) => {
-            if (result.isConfirmed) {
-              const message = `Halo Knitzy! Saya ingin memesan:\n\n*Produk:* ${product.name}\n*Harga:* Rp ${product.price.toLocaleString('id-ID')}\n\nApakah masih tersedia?`;
-              const phone = "6282115099611";
-              const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-              window.open(url, '_blank');
-            }
-          });
-        },
-        
-        showErrorAlert() {
-          Swal.fire({
-            title: 'Gagal Memuat Produk',
-            text: 'Terjadi kesalahan saat memuat daftar produk. Silakan coba lagi nanti atau hubungi kami melalui Instagram @knitzy_id',
-            icon: 'error'
-          });
+          if (confirm(`Anda akan membeli ${product.name} seharga Rp ${product.price.toLocaleString('id-ID')}. Pesanan akan dilanjutkan ke WhatsApp. Lanjutkan?`)) {
+            const message = `Halo Knitzy! Saya ingin memesan:\n\n*Produk:* ${product.name}\n*Harga:* Rp ${product.price.toLocaleString('id-ID')}\n\nApakah masih tersedia?`;
+            const phone = "6282115099611";
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+          }
         }
       }));
     });
 
+    // Initialize AOS
     AOS.init({
       duration: 800,
       once: true
