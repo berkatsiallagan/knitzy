@@ -1,16 +1,34 @@
 [
   {
     "id": 1,
-    "name": "Rajut Manis Topi",
-    "description": "Topi rajut handmade warna pastel.",
-    "price": 75000,
-    "image": "https://via.placeholder.com/300x200.png?text=Topi+Rajut"
+    "name": "Boneka Beruang Amigurumi",
+    "description": "Boneka beruang lucu hasil rajutan tangan.",
+    "price": 150000,
+    "image": "https://via.placeholder.com/300x200.png?text=Amigurumi+Bear",
+    "category": "amigurumi"
   },
   {
     "id": 2,
     "name": "Scarf Musim Dingin",
     "description": "Scarf rajutan hangat dan stylish.",
     "price": 120000,
-    "image": "https://via.placeholder.com/300x200.png?text=Scarf"
+    "image": "https://via.placeholder.com/300x200.png?text=Scarf",
+    "category": "amigurumi"
+  },
+  {
+    "id": 3,
+    "name": "Clay Pot Mini",
+    "description": "Pot tanaman mini dari clay.",
+    "price": 75000,
+    "image": "https://via.placeholder.com/300x200.png?text=Clay+Pot",
+    "category": "clay"
+  },
+  {
+    "id": 4,
+    "name": "Keychain Karakter",
+    "description": "Keychain karakter lucu handmade.",
+    "price": 45000,
+    "image": "https://via.placeholder.com/300x200.png?text=Keychain",
+    "category": "keychain"
   }
 ]
