@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "Rajut Manis Topi",
+    "description": "Topi rajut handmade warna pastel.",
+    "price": 75000,
+    "image": "https://via.placeholder.com/300x200.png?text=Topi+Rajut"
+  },
+  {
+    "id": 2,
+    "name": "Scarf Musim Dingin",
+    "description": "Scarf rajutan hangat dan stylish.",
+    "price": 120000,
+    "image": "https://via.placeholder.com/300x200.png?text=Scarf"
+  }
+]
