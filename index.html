@@ -10,12 +10,14 @@
   <script src="https://unpkg.com/alpinejs" defer></script>
   <style>
     body {
-      background-color: #a5c94f; /* warna latar dari logo */
+      background-color: #a5c94f;
       font-family: 'Courier New', monospace;
     }
-    .category-btn.active {
-      background-color: #1a3e1a;
-      color: white;
+    select {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%231a3e1a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
     }
   </style>
 </head>
@@ -27,35 +29,32 @@
       <p class="text-sm mt-2">EST. JUNE '24</p>
     </header>
 
-    <!-- Category Filter -->
-    <div class="flex justify-center mb-8 gap-2 flex-wrap">
+    <!-- Filter Section -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+      <!-- Category Dropdown -->
+      <div class="relative w-full md:w-64">
+        <select 
+          x-model="activeCategory" 
+          @change="filterProducts()"
+          class="appearance-none w-full bg-white border border-green-900 text-green-900 py-3 px-4 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-800 focus:border-green-800"
+        >
+          <option value="all">Semua Kategori</option>
+          <option value="amigurumi">Amigurumi</option>
+          <option value="clay">Clay</option>
+          <option value="keychain">Keychain</option>
+        </select>
+      </div>
+      
+      <!-- Sort Button -->
       <button 
-        @click="filterProducts('all')" 
-        class="category-btn bg-green-900 text-white py-2 px-4 rounded-lg hover:bg-green-800 transition active"
-        :class="{'active': activeCategory === 'all'}"
+        @click="toggleSortOrder()"
+        class="w-full md:w-auto flex items-center gap-2 bg-white border border-green-900 text-green-900 py-3 px-4 rounded-lg hover:bg-gray-50 transition"
       >
-        Semua Produk
-      </button>
-      <button 
-        @click="filterProducts('amigurumi')" 
-        class="category-btn bg-white text-green-900 py-2 px-4 rounded-lg hover:bg-gray-100 transition border border-green-900"
-        :class="{'active': activeCategory === 'amigurumi'}"
-      >
-        Amigurumi
-      </button>
-      <button 
-        @click="filterProducts('clay')" 
-        class="category-btn bg-white text-green-900 py-2 px-4 rounded-lg hover:bg-gray-100 transition border border-green-900"
-        :class="{'active': activeCategory === 'clay'}"
-      >
-        Clay
-      </button>
-      <button 
-        @click="filterProducts('keychain')" 
-        class="category-btn bg-white text-green-900 py-2 px-4 rounded-lg hover:bg-gray-100 transition border border-green-900"
-        :class="{'active': activeCategory === 'keychain'}"
-      >
-        Keychain
+        <span x-text="sortAscending ? 'Terlama' : 'Terbaru'"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x-show="!sortAscending" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x-show="sortAscending" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+        </svg>
       </button>
     </div>
 
@@ -66,8 +65,11 @@
             <img :src="product.image" :alt="product.name" class="rounded-lg w-full h-48 object-cover mb-3">
             <h2 class="text-lg font-semibold" x-text="product.name"></h2>
             <p class="text-sm text-gray-600 mb-2" x-text="product.description"></p>
-            <p class="font-bold text-green-800 mb-4" x-text="`Rp ${product.price.toLocaleString('id-ID')}`"></p>
-            <button @click="buyProduct(product)" class="bg-green-900 text-white py-2 px-4 rounded-lg hover:bg-green-800 transition">
+            <div class="flex justify-between items-center">
+              <p class="font-bold text-green-800" x-text="`Rp ${product.price.toLocaleString('id-ID')}`"></p>
+              <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded" x-text="product.category"></span>
+            </div>
+            <button @click="buyProduct(product)" class="mt-4 w-full bg-green-900 text-white py-2 px-4 rounded-lg hover:bg-green-800 transition">
               Beli via WhatsApp
             </button>
           </div>
@@ -86,21 +88,37 @@
         products: [],
         filteredProducts: [],
         activeCategory: 'all',
+        sortAscending: false,
+        
         async fetchProducts() {
           const res = await fetch('assets/data/products.json');
           this.products = await res.json();
-          this.filteredProducts = this.products; // Initialize filtered products
+          this.sortProducts();
+          this.filterProducts();
         },
-        filterProducts(category) {
-          this.activeCategory = category;
-          if (category === 'all') {
-            this.filteredProducts = this.products;
+        
+        filterProducts() {
+          if (this.activeCategory === 'all') {
+            this.filteredProducts = [...this.products];
           } else {
             this.filteredProducts = this.products.filter(
-              product => product.category === category
+              product => product.category === this.activeCategory
             );
           }
+          this.sortProducts();
         },
+        
+        sortProducts() {
+          this.filteredProducts.sort((a, b) => {
+            return this.sortAscending ? a.id - b.id : b.id - a.id;
+          });
+        },
+        
+        toggleSortOrder() {
+          this.sortAscending = !this.sortAscending;
+          this.sortProducts();
+        },
+        
         buyProduct(product) {
           Swal.fire({
             title: `Beli ${product.name}?`,
