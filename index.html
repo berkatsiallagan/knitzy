@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Knitzy - Katalog</title>
+  <meta name="description" content="Katalog produk handmade Knitzy_ID - Amigurumi, Clay, dan Keychain">
+  <title>Knitzy - Katalog Produk</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
@@ -27,6 +28,7 @@
       width: 100%;
       padding-bottom: 100%;
       overflow: hidden;
+      border-radius: 0.5rem;
     }
     .product-image {
       position: absolute;
@@ -35,12 +37,13 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .product-image:hover {
+      transform: scale(1.05);
     }
     main {
       flex: 1;
-    }
-    footer {
-      /* background-color: #1a3e1a; */
     }
     .search-input {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='%231a3e1a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' /%3E%3C/svg%3E");
@@ -48,19 +51,58 @@
       background-repeat: no-repeat;
       background-size: 1.25rem 1.25rem;
     }
+    .loading-spinner {
+      border-top-color: #1a3e1a;
+      animation: spinner 0.8s linear infinite;
+    }
+    @keyframes spinner {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
-<body class="text-green-900" x-data="productApp()" x-init="fetchProducts()" data-aos="fade-in">
+<body class="text-green-900" x-data="productApp()" x-init="initApp()">
   <div class="max-w-5xl mx-auto px-4 py-10 flex-1 w-full">
     <header class="text-center mb-10">
-      <img src="assets/logo/knitzy.jpg" alt="Knitzy Logo" class="mx-auto w-32 mb-4 rounded-full border-green border-2">
+      <img src="assets/logo/knitzy.jpg" alt="Knitzy Logo" class="mx-auto w-32 mb-4 rounded-full border-2 border-green-900">
       <h1 class="text-4xl font-bold tracking-wider">KNITZY_ID</h1>
       <p class="text-sm mt-2">EST. JUNE '24</p>
     </header>
 
     <!-- Filter Section -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-      <!-- Search Input -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-2 gap-4">
+      <!-- Left Group (Category and Sort) -->
+      <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+        <!-- Category Dropdown -->
+        <div class="relative w-full md:w-64">
+          <select 
+            x-model="activeCategory" 
+            @change="filterProducts()"
+            class="appearance-none w-full bg-white border border-green-900 text-green-900 py-3 px-4 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-800 focus:border-green-800"
+            aria-label="Filter berdasarkan kategori"
+          >
+            <option value="all">Semua Kategori</option>
+            <option value="amigurumi">Amigurumi</option>
+            <option value="clay">Clay</option>
+            <option value="keychain">Keychain</option>
+          </select>
+        </div>
+
+        <!-- Sort Button -->
+        <button 
+          @click="toggleSortOrder()"
+          class="w-full md:w-auto flex items-center justify-between bg-white border border-green-900 text-green-900 py-3 px-4 rounded-lg hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-green-800"
+          aria-label="Urutkan produk"
+        >
+          <span x-text="sortAscending ? 'Terlama' : 'Terbaru'"></span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x-show="!sortAscending" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x-show="sortAscending" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Right Group (Search) -->
       <div class="relative w-full md:w-64">
         <input 
           type="text" 
@@ -68,47 +110,71 @@
           @input.debounce.300ms="filterProducts()"
           placeholder="Cari produk..."
           class="search-input w-full bg-white border border-green-900 text-green-900 py-3 px-4 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-800 focus:border-green-800"
+          aria-label="Cari produk"
         >
       </div>
-      
-      <!-- Category Dropdown -->
-      <div class="relative w-full md:w-64">
-        <select 
-          x-model="activeCategory" 
-          @change="filterProducts()"
-          class="appearance-none w-full bg-white border border-green-900 text-green-900 py-3 px-4 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-800 focus:border-green-800"
-        >
-          <option value="all">Semua Kategori</option>
-          <option value="amigurumi">Amigurumi</option>
-          <option value="clay">Clay</option>
-          <option value="keychain">Keychain</option>
-        </select>
-      </div>
-      
-      <!-- Sort Button -->
-      <button 
-        @click="toggleSortOrder()"
-        class="w-full md:w-auto flex items-center gap-2 bg-white border border-green-900 text-green-900 py-3 px-4 rounded-lg hover:bg-gray-50 transition"
-      >
-        <span x-text="sortAscending ? 'Terlama' : 'Terbaru'"></span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x-show="!sortAscending" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x-show="sortAscending" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-        </svg>
-      </button>
     </div>
-
+    
     <!-- Product Count -->
-    <div class="mb-4 text-sm text-green-800">
+    <div class="mb-4 text-sm text-green-800 text-right">
       Menampilkan <span x-text="filteredProducts.length"></span> dari <span x-text="products.length"></span> produk
     </div>
 
     <main>
-      <div class="grid md:grid-cols-3 sm:grid-cols-2 gap-6">
+      <!-- Loading State -->
+      <div x-show="isLoading" class="text-center py-12">
+        <div class="inline-block h-12 w-12 loading-spinner rounded-full border-4 border-t-4 border-green-200"></div>
+        <p class="mt-4 text-green-900">Memuat produk...</p>
+      </div>
+      
+      <!-- Error State -->
+      <div x-show="hasError" x-transition class="text-center py-12">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-red-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <h3 class="text-xl font-bold text-red-700 mb-2">Gagal memuat produk</h3>
+        <p class="text-green-800 mb-4">Terjadi kesalahan saat memuat daftar produk.</p>
+        <button 
+          @click="fetchProducts()"
+          class="mt-4 bg-white border border-green-900 text-green-900 py-2 px-6 rounded-lg hover:bg-green-50 transition"
+        >
+          Coba Lagi
+        </button>
+      </div>
+      
+      <!-- Empty Search State -->
+      <div 
+        x-show="!isLoading && !hasError && filteredProducts.length === 0 && (searchQuery || activeCategory !== 'all')" 
+        x-transition
+        class="text-center py-12"
+      >
+        <div class="max-w-md mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-green-800 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 class="text-xl font-bold text-green-900 mb-2">
+            <span x-text="searchQuery ? 'Produk tidak ditemukan' : 'Belum ada produk di kategori ini'"></span>
+          </h3>
+          <p class="text-green-800" x-show="!searchQuery">
+            Kategori "<span x-text="activeCategory"></span>" saat ini kosong.
+          </p>
+          <p class="text-green-800" x-show="searchQuery">
+            Tidak ada produk yang cocok dengan "<span x-text="searchQuery"></span>".
+          </p>
+          <button 
+            @click="resetFilters()"
+            class="mt-4 bg-white border border-green-900 text-green-900 py-2 px-6 rounded-lg hover:bg-green-50 transition"
+          >
+            Tampilkan Semua Produk
+          </button>
+        </div>
+      </div>
+      
+      <!-- Product Grid -->
+      <div class="grid md:grid-cols-3 sm:grid-cols-2 gap-6" x-show="!isLoading && !hasError && filteredProducts.length > 0">
         <template x-for="product in filteredProducts" :key="product.id">
-          <div class="bg-white p-4 rounded-xl shadow-lg" data-aos="fade-up">
-            <!-- 1:1 Aspect Ratio Image Container -->
-            <div class="product-image-container rounded-lg mb-3">
+          <div class="bg-white p-4 rounded-xl shadow-lg hover:shadow-xl transition" data-aos="fade-up">
+            <div class="product-image-container mb-3">
               <img 
                 :src="product.image" 
                 :alt="product.name" 
@@ -117,12 +183,16 @@
               >
             </div>
             <h2 class="text-lg font-semibold" x-text="product.name"></h2>
-            <p class="text-sm text-gray-600 mb-2" x-text="product.description"></p>
+            <p class="text-sm text-gray-600 mb-2 line-clamp-2" x-text="product.description"></p>
             <div class="flex justify-between items-center">
               <p class="font-bold text-green-800" x-text="`Rp ${product.price.toLocaleString('id-ID')}`"></p>
-              <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded" x-text="product.category"></span>
+              <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded capitalize" x-text="product.category"></span>
             </div>
-            <button @click="buyProduct(product)" class="mt-4 w-full bg-green-900 text-white py-2 px-4 rounded-lg hover:bg-green-800 transition">
+            <button 
+              @click="buyProduct(product)" 
+              class="mt-4 w-full bg-green-900 text-white py-2 px-4 rounded-lg hover:bg-green-800 transition focus:outline-none focus:ring-2 focus:ring-green-700 focus:ring-offset-2"
+              aria-label="Beli produk"
+            >
               Beli
             </button>
           </div>
@@ -131,12 +201,12 @@
     </main>
   </div>
 
-  <!-- Simple Footer -->
+  <!-- Footer -->
   <footer class="text-white text-center py-6 bg-green-800">
     <div class="max-w-5xl mx-auto px-4">
       <p class="mb-2">© 2025 Knitzy_ID. All Rights Reserved.</p>
       <div class="flex justify-center space-x-4">
-        <a href="https://instagram.com/knitzy_id" class="hover:text-green-300 transition text-2xl">
+        <a href="https://instagram.com/knitzy_id" class="hover:text-green-300 transition text-2xl" aria-label="Instagram Knitzy">
           <i class="fab fa-instagram"></i>
         </a>
       </div>
@@ -153,15 +223,31 @@
         activeCategory: 'all',
         sortAscending: false,
         searchQuery: '',
+        isLoading: true,
+        hasError: false,
+        
+        initApp() {
+          AOS.init({
+            duration: 800,
+            once: true
+          });
+          this.fetchProducts();
+        },
         
         async fetchProducts() {
+          this.isLoading = true;
+          this.hasError = false;
+          
           try {
             const res = await fetch('assets/data/products.json');
+            if (!res.ok) throw new Error('Failed to fetch');
             this.products = await res.json();
             this.filterProducts();
           } catch (error) {
             console.error('Error loading products:', error);
-            alert('Error: Gagal memuat daftar produk');
+            this.hasError = true;
+          } finally {
+            this.isLoading = false;
           }
         },
         
@@ -199,8 +285,18 @@
           this.sortProducts();
         },
         
+        resetFilters() {
+          this.activeCategory = 'all';
+          this.searchQuery = '';
+          this.filterProducts();
+        },
+        
         buyProduct(product) {
-          if (confirm(`Anda akan membeli ${product.name} seharga Rp ${product.price.toLocaleString('id-ID')}. Pesanan akan dilanjutkan ke WhatsApp. Lanjutkan?`)) {
+          const confirmation = confirm(
+            `Anda akan membeli ${product.name} seharga Rp ${product.price.toLocaleString('id-ID')}.\n\nPesanan akan dilanjutkan ke WhatsApp. Lanjutkan?`
+          );
+          
+          if (confirmation) {
             const message = `Halo Knitzy! Saya ingin memesan:\n\n*Produk:* ${product.name}\n*Harga:* Rp ${product.price.toLocaleString('id-ID')}\n\nApakah masih tersedia?`;
             const phone = "6282115099611";
             const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
@@ -208,12 +304,6 @@
           }
         }
       }));
-    });
-
-    // Initialize AOS
-    AOS.init({
-      duration: 800,
-      once: true
     });
   </script>
 </body>
